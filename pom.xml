@@ -20,7 +20,7 @@
         <log4j.version>2.20.0</log4j.version>
         <guava.version>32.1.1-jre</guava.version>
         <auth0-jwt.version>4.4.0</auth0-jwt.version>
-        <curator.version>4.2.0</curator.version>
+        <curator.version>5.5.0</curator.version>
         <jackson.version>2.15.2</jackson.version>
         <juit.version>5.9.3</juit.version>
         <assertj.version>3.24.2</assertj.version>
