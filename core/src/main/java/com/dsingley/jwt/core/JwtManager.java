@@ -102,28 +102,17 @@ public class JwtManager {
     public DecodedJWT verify(String token) {
         DecodedJWT decodedJWT = JWT_INSTANCE.decodeJwt(token);
         log.info("decoded jti: {} for sub: {}", decodedJWT.getId(), decodedJWT.getSubject());
-        assertValidInstantClaim(decodedJWT, RegisteredClaims.ISSUED_AT,false);
-        assertValidInstantClaim(decodedJWT, RegisteredClaims.NOT_BEFORE, false);
-        assertValidInstantClaim(decodedJWT, RegisteredClaims.EXPIRES_AT, true);
+
+        // check token expiration before requiring the public key for signature verification
+        // because the public key may no longer be available
+        Instant expiresAt = decodedJWT.getClaim(RegisteredClaims.EXPIRES_AT).asInstant();
+        if (expiresAt != null && !Instant.now().minus(Duration.ofSeconds(leewaySeconds)).isBefore(expiresAt)) {
+            throw new TokenExpiredException(String.format("The Token has expired on %s.", expiresAt), expiresAt);
+        }
+
         verifier.verify(decodedJWT);
         log.info("verified jti: {} for sub: {}", decodedJWT.getId(), decodedJWT.getSubject());
         return decodedJWT;
-    }
-
-    private void assertValidInstantClaim(DecodedJWT decodedJWT, String claimName, boolean shouldBeFuture) {
-        Claim claim = decodedJWT.getClaim(claimName);
-        Instant claimVal = claim.asInstant();
-        if (claimVal != null) {
-            if (shouldBeFuture) {
-                if (!Instant.now().minus(Duration.ofSeconds(leewaySeconds)).isBefore(claimVal)) {
-                    throw new TokenExpiredException(String.format("The Token has expired on %s.", claimVal), claimVal);
-                }
-            } else {
-                if (Instant.now().plus(Duration.ofSeconds(leewaySeconds)).isBefore(claimVal)) {
-                    throw new IncorrectClaimException(String.format("The Token can't be used before %s.", claimVal), claimName, claim);
-                }
-            }
-        }
     }
 
     @SneakyThrows
