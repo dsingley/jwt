@@ -12,6 +12,7 @@
 
     <groupId>com.dsingley.jwt</groupId>
     <artifactId>jwt-curator</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
 
     <properties>
     </properties>

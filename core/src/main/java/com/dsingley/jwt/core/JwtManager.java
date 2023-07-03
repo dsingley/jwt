@@ -4,9 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.RegisteredClaims;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.IncorrectClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.RSAKeyProvider;
 import com.google.common.base.Suppliers;
@@ -34,7 +32,7 @@ public class JwtManager {
     private final String issuer;
     private final long ttlSeconds;
     private final long leewaySeconds;
-    private final Supplier<JwtKeyPair> supplier;
+    private final JwtKeyRepository repository;
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
 
@@ -42,41 +40,15 @@ public class JwtManager {
     public JwtManager(
             @NonNull String issuer,
             @NonNull Long ttlSeconds,
-            @NonNull JwtKeyRepository repository,
-            Long leewaySeconds
+            Long leewaySeconds,
+            @NonNull JwtKeyRepository repository
     ) {
         this.issuer = issuer;
         this.ttlSeconds = ttlSeconds;
         this.leewaySeconds = leewaySeconds != null && leewaySeconds > 0 ? leewaySeconds : 0;
-        supplier = Suppliers.memoizeWithExpiration(() -> {
-            JwtKeyPair jwtKeyPair = new JwtKeyPair(ttlSeconds, KEY_PAIR_GENERATOR.generateKeyPair());
-            if (log.isTraceEnabled()) {
-                log.info("generated kid: {}\n{}\n{}", jwtKeyPair.getKeyId(), JwtKeyPair.encode(jwtKeyPair.getRsaPublicKey()), JwtKeyPair.encode(jwtKeyPair.getRsaPrivateKey()));
-            } else {
-                log.info("generated kid: {}", jwtKeyPair.getKeyId());
-            }
-            repository.put(jwtKeyPair.toJwtPublicKey());
-            return jwtKeyPair;
-        }, ttlSeconds, TimeUnit.SECONDS);
-        algorithm = Algorithm.RSA512(new RSAKeyProvider() {
-            @Override
-            public RSAPublicKey getPublicKeyById(String keyId) {
-                JwtKeyPair jwtKeyPair = supplier.get();
-                return jwtKeyPair.getKeyId().equals(keyId)
-                        ? jwtKeyPair.getRsaPublicKey()
-                        : repository.get(keyId).getRsaPublicKey();
-            }
-
-            @Override
-            public RSAPrivateKey getPrivateKey() {
-                return supplier.get().getRsaPrivateKey();
-            }
-
-            @Override
-            public String getPrivateKeyId() {
-                return supplier.get().getKeyId();
-            }
-        });
+        this.repository = repository;
+        Supplier<JwtKeyPair> supplier = Suppliers.memoizeWithExpiration(this::newJwtKeyPair, ttlSeconds, TimeUnit.SECONDS);
+        algorithm = Algorithm.RSA512(new CustomRSAKeyProvider(supplier, this.repository));
         verifier = JWT.require(algorithm)
                 .withIssuer(issuer)
                 .acceptLeeway(this.leewaySeconds)
@@ -115,10 +87,55 @@ public class JwtManager {
         return decodedJWT;
     }
 
+    private JwtKeyPair newJwtKeyPair() {
+        JwtKeyPair jwtKeyPair = new JwtKeyPair(ttlSeconds + leewaySeconds, KEY_PAIR_GENERATOR.generateKeyPair());
+        if (log.isTraceEnabled()) {
+            log.trace("generated kid: {}\n{}\n{}", jwtKeyPair.getKeyId(), JwtKeyPair.encode(jwtKeyPair.getRsaPublicKey()), JwtKeyPair.encode(jwtKeyPair.getRsaPrivateKey()));
+        } else {
+            log.info("generated kid: {}", jwtKeyPair.getKeyId());
+        }
+        repository.put(jwtKeyPair.toJwtPublicKey());
+        return jwtKeyPair;
+    }
+
     @SneakyThrows
     private static KeyPairGenerator newKeyPairGenerator() {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         return keyPairGenerator;
+    }
+
+    private static class CustomRSAKeyProvider implements RSAKeyProvider {
+        private final Supplier<JwtKeyPair> supplier;
+        private final JwtKeyRepository repository;
+
+        private CustomRSAKeyProvider(Supplier<JwtKeyPair> supplier, JwtKeyRepository repository) {
+            this.supplier = supplier;
+            this.repository = repository;
+        }
+
+        @Override
+        public RSAPublicKey getPublicKeyById(String keyId) {
+            JwtKeyPair jwtKeyPair = supplier.get();
+            if (jwtKeyPair.getKeyId().equals(keyId)) {
+                return jwtKeyPair.getRsaPublicKey();
+            }
+            JwtPublicKey jwtPublicKey = repository.get(keyId);
+            if (jwtPublicKey != null) {
+                return jwtPublicKey.getRsaPublicKey();
+            }
+            log.warn("kid: {} not found", keyId);
+            return null;
+        }
+
+        @Override
+        public RSAPrivateKey getPrivateKey() {
+            return supplier.get().getRsaPrivateKey();
+        }
+
+        @Override
+        public String getPrivateKeyId() {
+            return supplier.get().getKeyId();
+        }
     }
 }
