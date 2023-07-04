@@ -14,7 +14,7 @@ import java.util.UUID;
 @Getter
 @ToString
 public class JwtKeyPair  {
-    private static final Base64.Encoder MIME_ENCODER = Base64.getMimeEncoder();
+    private static final Base64.Encoder BASE64_MIME_ENCODER = Base64.getMimeEncoder();
     private static final String BEGIN_RSA_PUBLIC_KEY = "-----BEGIN RSA PUBLIC KEY-----";
     private static final String END_RSA_PUBLIC_KEY = "-----END RSA PUBLIC KEY-----";
     private static final String BEGIN_RSA_PRIVATE_KEY = "-----BEGIN RSA PRIVATE KEY-----";
@@ -41,10 +41,10 @@ public class JwtKeyPair  {
     }
 
     public static String encode(RSAPublicKey rsaPublicKey) {
-        return String.format("%s%n%s%n%s", BEGIN_RSA_PUBLIC_KEY, MIME_ENCODER.encodeToString(rsaPublicKey.getEncoded()), END_RSA_PUBLIC_KEY);
+        return String.format("%s%n%s%n%s", BEGIN_RSA_PUBLIC_KEY, BASE64_MIME_ENCODER.encodeToString(rsaPublicKey.getEncoded()), END_RSA_PUBLIC_KEY);
     }
 
     public static String encode(RSAPrivateKey rsaPrivateKey) {
-        return String.format("%s%n%s%n%s", BEGIN_RSA_PRIVATE_KEY, MIME_ENCODER.encodeToString(rsaPrivateKey.getEncoded()), END_RSA_PRIVATE_KEY);
+        return String.format("%s%n%s%n%s", BEGIN_RSA_PRIVATE_KEY, BASE64_MIME_ENCODER.encodeToString(rsaPrivateKey.getEncoded()), END_RSA_PRIVATE_KEY);
     }
 }

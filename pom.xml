@@ -13,6 +13,7 @@
     <modules>
         <module>core</module>
         <module>curator</module>
+        <module>hazelcast</module>
     </modules>
 
     <properties>
@@ -23,6 +24,7 @@
         <auth0-jwt.version>4.4.0</auth0-jwt.version>
         <curator.version>5.5.0</curator.version>
         <jackson.version>2.15.2</jackson.version>
+        <hazelcast.version>4.2.8</hazelcast.version>
         <juit.version>5.9.3</juit.version>
         <assertj.version>3.24.2</assertj.version>
 
@@ -85,6 +87,11 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hazelcast</groupId>
+                <artifactId>hazelcast</artifactId>
+                <version>${hazelcast.version}</version>
             </dependency>
 
             <dependency>

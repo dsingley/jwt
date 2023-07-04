@@ -29,6 +29,7 @@ class CuratorJwtKeyRepositoryTest {
 
         JwtKeyRepository jwtKeyRepository = CuratorJwtKeyRepository.builder()
                 .curatorFramework(curatorFramework)
+                .mourningPeriodSeconds(30L)
                 .build();
 
         jwtManager = JwtManager.builder()

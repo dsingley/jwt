@@ -88,7 +88,7 @@ public class JwtManager {
     }
 
     private JwtKeyPair newJwtKeyPair() {
-        JwtKeyPair jwtKeyPair = new JwtKeyPair(ttlSeconds + leewaySeconds, KEY_PAIR_GENERATOR.generateKeyPair());
+        JwtKeyPair jwtKeyPair = new JwtKeyPair(ttlSeconds, KEY_PAIR_GENERATOR.generateKeyPair());
         if (log.isTraceEnabled()) {
             log.trace("generated kid: {}\n{}\n{}", jwtKeyPair.getKeyId(), JwtKeyPair.encode(jwtKeyPair.getRsaPublicKey()), JwtKeyPair.encode(jwtKeyPair.getRsaPrivateKey()));
         } else {

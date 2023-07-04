@@ -14,6 +14,7 @@ import lombok.SneakyThrows;
 import lombok.ToString;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serializable;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
@@ -24,7 +25,9 @@ import java.util.Base64;
 @Jacksonized
 @Getter
 @ToString
-public class JwtPublicKey {
+public class JwtPublicKey implements Serializable {
+    private static final long serialVersionUID = 9018488421745989722L;
+
     private final String keyId;
     private final OffsetDateTime expiresAt;
 
@@ -34,7 +37,7 @@ public class JwtPublicKey {
     private final RSAPublicKey rsaPublicKey;
 
     private static class RSAPublicKeySerializer extends StdSerializer<RSAPublicKey> {
-        private static final Base64.Encoder ENCODER = Base64.getEncoder();
+        private static final Base64.Encoder BASE64_URL_ENCODER = Base64.getUrlEncoder();
 
         protected RSAPublicKeySerializer() {
             super(RSAPublicKey.class);
@@ -43,12 +46,12 @@ public class JwtPublicKey {
         @Override
         @SneakyThrows
         public void serialize(RSAPublicKey value, JsonGenerator generator, SerializerProvider provider) {
-            generator.writeString(ENCODER.encodeToString(value.getEncoded()));
+            generator.writeString(BASE64_URL_ENCODER.encodeToString(value.getEncoded()));
         }
     }
 
     private static class RSAPublicKeyDeserializer extends StdDeserializer<RSAPublicKey> {
-        private static final Base64.Decoder DECODER = Base64.getDecoder();
+        private static final Base64.Decoder BASE64_URL_DECODER = Base64.getUrlDecoder();
         private static final KeyFactory KEY_FACTORY = newKeyFactory();
 
         protected RSAPublicKeyDeserializer() {
@@ -58,7 +61,7 @@ public class JwtPublicKey {
         @Override
         @SneakyThrows
         public RSAPublicKey deserialize(JsonParser parser, DeserializationContext context) {
-            byte[] bytes = DECODER.decode(parser.getValueAsString());
+            byte[] bytes = BASE64_URL_DECODER.decode(parser.getValueAsString());
             X509EncodedKeySpec x509EncodedKeySpec = new X509EncodedKeySpec(bytes);
             return (RSAPublicKey) KEY_FACTORY.generatePublic(x509EncodedKeySpec);
         }
