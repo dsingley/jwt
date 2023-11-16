@@ -24,7 +24,7 @@
         <auth0-jwt.version>4.4.0</auth0-jwt.version>
         <curator.version>5.5.0</curator.version>
         <jackson.version>2.16.0</jackson.version>
-        <hazelcast.version>4.2.8</hazelcast.version>
+        <hazelcast.version>5.3.6</hazelcast.version>
         <juit.version>5.10.1</juit.version>
         <assertj.version>3.24.2</assertj.version>
 
