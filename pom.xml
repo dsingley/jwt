@@ -18,7 +18,7 @@
 
     <properties>
         <lombok.version>1.18.30</lombok.version>
-        <slf4j.version>2.0.9</slf4j.version>
+        <slf4j.version>2.0.10</slf4j.version>
         <log4j.version>2.22.1</log4j.version>
         <guava.version>33.0.0-jre</guava.version>
         <auth0-jwt.version>4.4.0</auth0-jwt.version>
