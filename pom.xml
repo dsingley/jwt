@@ -25,7 +25,7 @@
         <curator.version>5.6.0</curator.version>
         <jackson.version>2.16.1</jackson.version>
         <hazelcast.version>4.2.8</hazelcast.version>
-        <juit.version>5.10.1</juit.version>
+        <juit.version>5.10.2</juit.version>
         <assertj.version>3.25.3</assertj.version>
 
         <maven-surefire.version>3.2.5</maven-surefire.version>
