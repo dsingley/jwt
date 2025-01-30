@@ -10,6 +10,10 @@
             <AppenderRef ref="Console"/>
         </Logger>
 
+        <Logger name="com.dsingley.testpki" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
         <Root level="warn">
             <AppenderRef ref="Console"/>
         </Root>

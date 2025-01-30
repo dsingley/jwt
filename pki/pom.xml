@@ -11,13 +11,17 @@
     </parent>
 
     <groupId>com.dsingley.jwt</groupId>
-    <artifactId>jwt-core</artifactId>
+    <artifactId>jwt-pki</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
 
     <dependencies>
         <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
+            <groupId>com.dsingley.jwt</groupId>
+            <artifactId>jwt-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <dependency>
@@ -31,6 +35,14 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dsingley</groupId>
+            <artifactId>test-pki</artifactId>
         </dependency>
     </dependencies>
 </project>
