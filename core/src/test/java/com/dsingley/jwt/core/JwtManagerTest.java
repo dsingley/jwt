@@ -27,7 +27,7 @@ class JwtManagerTest {
     static JwtManager jwtManager;
 
     @BeforeAll
-    static void setup() throws Exception {
+    static void setUp() throws Exception {
         keyId = UUID.randomUUID().toString().replace("-", "");
         KeyPair keyPair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
         log.info("public key for {}:\n{}", keyId, encodeToPem(keyPair.getPublic()));
