@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import static com.auth0.jwt.RegisteredClaims.SUBJECT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -47,6 +48,7 @@ class JwtManagerTest {
                 .ttlSeconds(30L)
                 .signingAlgorithmSupplier(signingAlgorithmSupplier)
                 .verificationAlgorithmSupplier(verificationAlgorithmSupplier)
+                .payloadPredicate(SUBJECT, (claim, decodedJWT) -> claim.asString().startsWith("test"))
                 .build();
     }
 
