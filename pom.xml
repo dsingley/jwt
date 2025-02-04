@@ -26,7 +26,7 @@
         <juit.version>5.11.4</juit.version>
         <assertj.version>3.27.3</assertj.version>
         <mockwebserver3.version>5.0.0-alpha.14</mockwebserver3.version>
-        <test-pki.version>1.0-SNAPSHOT</test-pki.version>
+        <testpki.version>0.5.0-SNAPSHOT</testpki.version>
 
         <maven-surefire.version>3.5.2</maven-surefire.version>
         <maven.compiler.source>8</maven.compiler.source>
@@ -109,8 +109,8 @@
             </dependency>
             <dependency>
                 <groupId>com.dsingley</groupId>
-                <artifactId>test-pki</artifactId>
-                <version>${test-pki.version}</version>
+                <artifactId>testpki</artifactId>
+                <version>${testpki.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
