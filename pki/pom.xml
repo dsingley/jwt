@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.dsingley</groupId>
-            <artifactId>test-pki</artifactId>
+            <artifactId>testpki</artifactId>
         </dependency>
     </dependencies>
 </project>

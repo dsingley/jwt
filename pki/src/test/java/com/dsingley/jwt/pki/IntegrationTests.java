@@ -35,7 +35,7 @@ public class IntegrationTests {
     static JwtManager jwtManager;
 
     @BeforeAll
-    static void setup() {
+    static void setUp() {
         TestPKI testPKI = new TestPKI(KeyType.RSA_2048, null);
         TestPKICertificate serverCertificate = testPKI.getOrCreateServerCertificate("jwt-issuer", Collections.singleton("localhost"));
 

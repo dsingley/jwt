@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -15,13 +16,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static com.auth0.jwt.HeaderParams.ALGORITHM;
 import static com.auth0.jwt.HeaderParams.CONTENT_TYPE;
 import static com.auth0.jwt.HeaderParams.KEY_ID;
 import static com.auth0.jwt.HeaderParams.TYPE;
 import static com.auth0.jwt.RegisteredClaims.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 @UtilityClass
 public class JWTs {
@@ -55,7 +57,7 @@ public class JWTs {
      * @param leewaySeconds the number of seconds to allow past the expiration time (optional)
      * @throws TokenExpiredException if the token has expired
      */
-    public static void verifyExpiresAt(@NonNull DecodedJWT decodedJWT, Long leewaySeconds) throws TokenExpiredException {
+    public static void verifyExpiresAt(@NonNull DecodedJWT decodedJWT, @Nullable Long leewaySeconds) throws TokenExpiredException {
         Instant expiresAt = decodedJWT.getClaim(EXPIRES_AT).asInstant();
         Instant now = Instant.now().truncatedTo(ChronoUnit.SECONDS);
         boolean isValid = expiresAt == null || now.minusSeconds(leewaySeconds != null && leewaySeconds > 0 ? leewaySeconds : 0).isBefore(expiresAt);
@@ -73,11 +75,11 @@ public class JWTs {
 
     public static List<String> listHeaders(@NonNull DecodedJWT decodedJWT) {
         return HEADER_CLAIMS.stream()
-                .collect(Collectors.toMap(Function.identity(), decodedJWT::getHeaderClaim, (v1, v2) -> v1, LinkedHashMap::new))
+                .collect(toMap(Function.identity(), decodedJWT::getHeaderClaim, (v1, v2) -> v1, LinkedHashMap::new))
                 .entrySet().stream()
                 .filter(entry -> !entry.getValue().isMissing())
                 .map(entry -> String.format("%s: %s", entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public static List<String> listPayload(@NonNull DecodedJWT decodedJWT) {
