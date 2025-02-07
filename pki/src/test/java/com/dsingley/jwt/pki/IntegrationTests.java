@@ -68,6 +68,7 @@ public class IntegrationTests {
                 .ttlSeconds(30L)
                 .signingAlgorithmSupplier(signingAlgorithmSupplier)
                 .verificationAlgorithmSupplier(verificationAlgorithmSupplier)
+                .keyIdPredicate(kid -> kid.startsWith(mockWebServer.url("/").toString()))
                 .build();
     }
 

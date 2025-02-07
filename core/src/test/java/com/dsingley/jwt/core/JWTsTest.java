@@ -2,6 +2,7 @@ package com.dsingley.jwt.core;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.junit.jupiter.api.Nested;
@@ -13,6 +14,34 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
 class JWTsTest {
+
+    @Nested
+    class VerifyKeyId {
+
+        @Test
+        void shouldNot_throwException_whenPredicateReturnsTrue() {
+            String jwt = JWT.create()
+                    .withKeyId("trusted")
+                    .sign(Algorithm.none());
+            DecodedJWT decodedJWT = JWT.decode(jwt);
+
+            assertThatNoException().isThrownBy(() ->
+                    JWTs.verifyKeyId(decodedJWT, "trusted"::equals)
+            );
+        }
+
+        @Test
+        void should_throwException_whenPredicateReturnsFalse() {
+            String jwt = JWT.create()
+                    .withKeyId("untrusted")
+                    .sign(Algorithm.none());
+            DecodedJWT decodedJWT = JWT.decode(jwt);
+
+            assertThatExceptionOfType(InvalidClaimException.class).isThrownBy(() ->
+                    JWTs.verifyKeyId(decodedJWT, "trusted"::equals)
+            ).withMessageContaining("'kid' value is not valid");
+        }
+    }
 
     @Nested
     class VerifyExpiresAt {
