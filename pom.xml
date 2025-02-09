@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.dsingley</groupId>
-    <artifactId>jwt</artifactId>
+    <groupId>com.dsingley.jwt</groupId>
+    <artifactId>jwt-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -49,7 +49,7 @@
         <juit.version>5.11.4</juit.version>
         <assertj.version>3.27.3</assertj.version>
         <mockwebserver3.version>5.0.0-alpha.14</mockwebserver3.version>
-        <testpki.version>0.5.0-SNAPSHOT</testpki.version>
+        <testpki.version>0.5.0</testpki.version>
 
         <maven-surefire.version>3.5.2</maven-surefire.version>
         <maven-source.version>3.3.1</maven-source.version>
@@ -135,7 +135,7 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.dsingley</groupId>
+                <groupId>com.dsingley.testpki</groupId>
                 <artifactId>testpki</artifactId>
                 <version>${testpki.version}</version>
                 <scope>test</scope>
@@ -152,20 +152,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <name>Central Portal Snapshots</name>
-            <id>central-portal-snapshots</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <profiles>
         <profile>
