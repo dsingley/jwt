@@ -28,8 +28,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com:dsingley/jwt.git</connection>
-        <developerConnection>scm:git:ssh://github.com:dsingley/jwt.git</developerConnection>
+        <connection>scm:git:https://github.com/dsingley/jwt.git</connection>
+        <developerConnection>scm:git:git@github.com:dsingley/jwt.git</developerConnection>
         <url>https://github.com/dsingley/jwt</url>
     </scm>
 
@@ -39,6 +39,8 @@
     </modules>
 
     <properties>
+        <arguments />
+
         <lombok.version>1.18.36</lombok.version>
         <checker-qual.version>3.48.4</checker-qual.version>
         <slf4j.version>2.0.16</slf4j.version>
@@ -52,6 +54,7 @@
         <testpki.version>0.5.0</testpki.version>
 
         <maven-surefire.version>3.5.2</maven-surefire.version>
+        <maven-release.version>3.1.1</maven-release.version>
         <maven-source.version>3.3.1</maven-source.version>
         <maven-javadoc.version>3.11.2</maven-javadoc.version>
         <maven-gpg.version>3.2.7</maven-gpg.version>
@@ -150,6 +153,18 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven-release.version}</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <arguments>${arguments} -Prelease</arguments>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -205,6 +220,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
+                            <deploymentName>${project.name} ${project.version}</deploymentName>
                             <!--
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
