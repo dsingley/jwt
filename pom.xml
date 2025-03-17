@@ -23,7 +23,7 @@
         <guava.version>33.4.0-jre</guava.version>
         <auth0-jwt.version>4.5.0</auth0-jwt.version>
 
-        <juit.version>5.12.0</juit.version>
+        <juit.version>5.12.1</juit.version>
         <assertj.version>3.27.3</assertj.version>
         <mockwebserver3.version>5.0.0-alpha.14</mockwebserver3.version>
         <testpki.version>0.5.0-SNAPSHOT</testpki.version>
