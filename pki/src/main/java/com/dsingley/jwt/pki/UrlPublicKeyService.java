@@ -5,16 +5,15 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.Builder;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.time.Duration;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 
 /**
  * An UrlPublicKeyService is a {@link PublicKeyService} implementation
@@ -36,7 +35,12 @@ public class UrlPublicKeyService implements PublicKeyService {
         this.sslSocketFactory = sslSocketFactory;
         cache = CacheBuilder.newBuilder()
                 .expireAfterAccess(cacheTtl != null ? cacheTtl : DEFAULT_CACHE_TTL)
-                .build(CacheLoader.from(this::loadPublicKey));
+                .build(new CacheLoader<URL, PublicKey>() {
+                    @Override
+                    public @NonNull PublicKey load(@NonNull URL key) {
+                        return loadPublicKey(key);
+                    }
+                });
     }
 
     /**
@@ -51,31 +55,24 @@ public class UrlPublicKeyService implements PublicKeyService {
         return cache.getUnchecked(url);
     }
 
+    @SneakyThrows
     private URL getUrl(String keyId) {
-        URL url;
-        try {
-            url = new URL(keyId);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        URL url = new URL(keyId);
         if (!"https".equals(url.getProtocol())) {
             throw new IllegalArgumentException("URL protocol is not https");
         }
         return url;
     }
 
+    @SneakyThrows
     private PublicKey loadPublicKey(URL url) {
-        try {
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-            if (sslSocketFactory != null) {
-                connection.setSSLSocketFactory(sslSocketFactory);
-            }
-            log.debug("connecting to {} to load public key...", url);
-            connection.connect();
-            Certificate serverCertificate = connection.getServerCertificates()[0];
-            return serverCertificate.getPublicKey();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        if (sslSocketFactory != null) {
+            connection.setSSLSocketFactory(sslSocketFactory);
         }
+        log.debug("connecting to {} to load public key...", url);
+        connection.connect();
+        Certificate serverCertificate = connection.getServerCertificates()[0];
+        return serverCertificate.getPublicKey();
     }
 }

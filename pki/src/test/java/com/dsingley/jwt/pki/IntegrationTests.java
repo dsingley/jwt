@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Slf4j
-public class IntegrationTests {
+class IntegrationTests {
     static final JwtAlgorithm JWT_ALGORITHM = JwtAlgorithm.RS512;
     static MockWebServer mockWebServer;
     static String keyId;
