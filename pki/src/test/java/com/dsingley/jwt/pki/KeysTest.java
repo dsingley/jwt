@@ -20,6 +20,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.Security;
+import java.util.Arrays;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -52,7 +54,7 @@ class KeysTest {
             String keystorePassword = serverCertificate.getKeystorePassword();
             KeyStore keyStore = Keys.loadKeyStore(keystorePath, keystorePassword);
 
-            KeyPair keyPair = Keys.getKeyPair(keyStore, "server", keystorePassword);
+            KeyPair keyPair = Keys.getKeyPair(keyStore, keystorePassword);
 
             assertAll(
                     () -> assertThat(keyPair.getPublic())
