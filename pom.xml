@@ -48,7 +48,7 @@
         <guava.version>33.4.6-jre</guava.version>
         <auth0-jwt.version>4.5.0</auth0-jwt.version>
 
-        <juit.version>5.12.1</juit.version>
+        <junit.version>5.12.1</junit.version>
         <assertj.version>3.27.3</assertj.version>
         <mockwebserver3.version>5.0.0-alpha.14</mockwebserver3.version>
         <testpki.version>0.5.0</testpki.version>
@@ -114,9 +114,16 @@
             </dependency>
 
             <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>${juit.version}</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
