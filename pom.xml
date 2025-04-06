@@ -4,11 +4,34 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.dsingley</groupId>
-    <artifactId>jwt</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.dsingley.jwt</groupId>
+    <artifactId>jwt-parent</artifactId>
+    <version>0.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>${project.groupId}:${project.artifactId}</name>
+    <description>A package for creating and verifying JSON Web Tokens (JWTs).</description>
+    <url>https://github.com/dsingley/jwt</url>
+
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>David Singley</name>
+            <url>https://github.com/dsingley</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/dsingley/jwt.git</connection>
+        <developerConnection>scm:git:git@github.com:dsingley/jwt.git</developerConnection>
+        <url>https://github.com/dsingley/jwt</url>
+    </scm>
 
     <modules>
         <module>core</module>
@@ -16,6 +39,8 @@
     </modules>
 
     <properties>
+        <arguments />
+
         <lombok.version>1.18.38</lombok.version>
         <checker-qual.version>3.49.2</checker-qual.version>
         <slf4j.version>2.0.17</slf4j.version>
@@ -23,12 +48,17 @@
         <guava.version>33.4.6-jre</guava.version>
         <auth0-jwt.version>4.5.0</auth0-jwt.version>
 
-        <juit.version>5.12.1</juit.version>
+        <junit.version>5.12.1</junit.version>
         <assertj.version>3.27.3</assertj.version>
         <mockwebserver3.version>5.0.0-alpha.14</mockwebserver3.version>
-        <testpki.version>0.5.0-SNAPSHOT</testpki.version>
+        <testpki.version>0.5.0</testpki.version>
 
         <maven-surefire.version>3.5.3</maven-surefire.version>
+        <maven-release.version>3.1.1</maven-release.version>
+        <maven-source.version>3.3.1</maven-source.version>
+        <maven-javadoc.version>3.11.2</maven-javadoc.version>
+        <maven-gpg.version>3.2.7</maven-gpg.version>
+        <central-publishing.version>0.7.0</central-publishing.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -84,9 +114,16 @@
             </dependency>
 
             <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
-                <version>${juit.version}</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -108,7 +145,7 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.dsingley</groupId>
+                <groupId>com.dsingley.testpki</groupId>
                 <artifactId>testpki</artifactId>
                 <version>${testpki.version}</version>
                 <scope>test</scope>
@@ -123,20 +160,82 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire.version}</version>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>${maven-release.version}</version>
+                <configuration>
+                    <mavenExecutorId>forked-path</mavenExecutorId>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <arguments>${arguments} -Prelease</arguments>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <name>Central Portal Snapshots</name>
-            <id>central-portal-snapshots</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>${maven-source.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>${maven-javadoc.version}</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven-gpg.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>${central-publishing.version}</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <deploymentName>${project.name} ${project.version}</deploymentName>
+                            <!--
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>published</waitUntil>
+                            -->
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
