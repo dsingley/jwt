@@ -22,6 +22,14 @@ public class KeyPairSigningAlgorithmSupplier implements SigningAlgorithmSupplier
     private final Algorithm algorithm;
 
     public KeyPairSigningAlgorithmSupplier(
+            @NonNull String hashSize,
+            @NonNull KeyPair keyPair,
+            String keyId
+    ) {
+        this(JwtAlgorithm.compatibleWithKeyPairAndHashSize(keyPair, hashSize), keyPair, keyId);
+    }
+
+    public KeyPairSigningAlgorithmSupplier(
             @NonNull JwtAlgorithm jwtAlgorithm,
             @NonNull KeyPair keyPair,
             String keyId

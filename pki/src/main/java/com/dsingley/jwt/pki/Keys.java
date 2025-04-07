@@ -2,6 +2,7 @@ package com.dsingley.jwt.pki;
 
 import com.google.common.annotations.VisibleForTesting;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
@@ -10,11 +11,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -25,68 +33,83 @@ public class Keys {
     private static final Pattern KEYSTORE_TYPE_PATTERN = Pattern.compile(".*(?<extension>\\.(?:jks|p12|pkcs12))$");
 
     /**
-     * Load a {@link KeyStore} from the specified file path using the provided password.
+     * Load a {@link KeyStore} from the specified file path, using the specified password if provided.
      *
      * @param keystorePath     the file path of the KeyStore to be loaded
-     * @param keystorePassword the password to access the KeyStore
+     * @param keystorePassword the password to access the KeyStore (optional)
      * @return the loaded KeyStore instance
      */
     @SneakyThrows
     public static KeyStore loadKeyStore(
-            String keystorePath,
+            @NonNull String keystorePath,
             String keystorePassword
     ) {
         KeyStore keyStore = getKeystoreInstance(keystorePath);
         try (InputStream inputStream = Files.newInputStream(Paths.get(keystorePath))) {
-            keyStore.load(inputStream, keystorePassword.toCharArray());
+            keyStore.load(inputStream, keystorePassword != null ? keystorePassword.toCharArray() : null);
         }
         return keyStore;
     }
 
     /**
-     * Retrieve the first {@link KeyPair} consisting of public and private keys from the provided {@link KeyStore}.
+     * Retrieve a {@link KeyPair} consisting of the public and private keys from the provided {@link KeyStore}.
+     * <p>
+     * If an alias is not specified, a KeyPair including the first private key entry will be returned.
      *
      * @param keyStore    the KeyStore instance from which to retrieve the key pair
-     * @param keyPassword the password to access the private key
-     * @return the KeyPair containing the public and private keys
-     * @throws IllegalArgumentException if no private key entry is found in the KeyStore
-     */
-    @SneakyThrows
-    public static KeyPair getKeyPair(
-            KeyStore keyStore,
-            String keyPassword
-    ) {
-        Enumeration<String> aliases = keyStore.aliases();
-        while (aliases.hasMoreElements()) {
-            String alias = aliases.nextElement();
-            if (keyStore.isKeyEntry(alias)) {
-                return getKeyPair(keyStore, alias, keyPassword);
-            }
-        }
-        throw new IllegalArgumentException("no private key entry found in keystore");
-    }
-
-    /**
-     * Retrieve a {@link KeyPair} consisting of the public and private keys with the specified alias from the provided {@link KeyStore}.
-     *
-     * @param keyStore    the KeyStore instance from which to retrieve the key pair
-     * @param alias       the alias identifying the private key entry within the KeyStore
      * @param keyPassword the password to access the private key corresponding to the alias
+     * @param alias       the alias identifying the private key entry within the KeyStore (optional)
      * @return the KeyPair containing the public and private keys
-     * @throws IllegalArgumentException if the alias does not correspond to a private key entry in the KeyStore
+     * @throws IllegalArgumentException if the alias is not found or does not correspond to a private key entry
      */
     @SneakyThrows
     public static KeyPair getKeyPair(
-            KeyStore keyStore,
-            String alias,
-            String keyPassword
+            @NonNull KeyStore keyStore,
+            @NonNull String keyPassword,
+            String alias
     ) {
-        if (!keyStore.isKeyEntry(alias)) {
-            throw new IllegalArgumentException(String.format("alias '%s' is not a private key entry", alias));
+        if (alias == null) {
+            alias = stream(keyStore.aliases())
+                    .filter(a -> {
+                        try {
+                            return keyStore.isKeyEntry(a);
+                        } catch (KeyStoreException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("no private key entry found in keystore"));
+        } else {
+            if (!keyStore.containsAlias(alias)) {
+                throw new IllegalArgumentException(String.format("alias not found in keystore: '%s'", alias));
+            }
+            if (!keyStore.isKeyEntry(alias)) {
+                throw new IllegalArgumentException(String.format("alias '%s' is not a private key entry", alias));
+            }
         }
         PublicKey publicKey = keyStore.getCertificate(alias).getPublicKey();
         PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, keyPassword.toCharArray());
         return new KeyPair(publicKey, privateKey);
+    }
+
+    /**
+     * Compute the SHA-256 fingerprint of the public key component of the provided {@link KeyPair}.
+     *
+     * @param keyPair the KeyPair containing a public key
+     * @return a lowercase hexadecimal string representing the SHA-256 fingerprint of the public key
+     */
+    @SneakyThrows
+    public static String computePublicKeyFingerprintSHA256(
+            @NonNull KeyPair keyPair
+    ) {
+        byte[] encoded = keyPair.getPublic().getEncoded();
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hashed = digest.digest(encoded);
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashed) {
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString().toLowerCase();
     }
 
     /**
@@ -97,10 +120,10 @@ public class Keys {
      * @param trustStore       the {@link KeyStore} containing trusted certificates for verifying server identity
      * @return the configured SSLSocketFactory for secure socket communication
      */
-    public SSLSocketFactory createSSLSocketFactory(
-            KeyStore keyStore,
-            String keystorePassword,
-            KeyStore trustStore
+    public static SSLSocketFactory createSSLSocketFactory(
+            @NonNull KeyStore keyStore,
+            @NonNull String keystorePassword,
+            @NonNull KeyStore trustStore
     ) {
         return createSSLSocketFactory(keyStore, keystorePassword, trustStore, SecureSocketProtocol.TLS_1_2);
     }
@@ -115,11 +138,11 @@ public class Keys {
      * @return the configured SSLSocketFactory for secure socket communication
      */
     @SneakyThrows
-    public SSLSocketFactory createSSLSocketFactory(
-            KeyStore keyStore,
-            String keystorePassword,
-            KeyStore trustStore,
-            SecureSocketProtocol secureSocketProtocol
+    public static SSLSocketFactory createSSLSocketFactory(
+            @NonNull KeyStore keyStore,
+            @NonNull String keystorePassword,
+            @NonNull KeyStore trustStore,
+            @NonNull SecureSocketProtocol secureSocketProtocol
     ) {
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, keystorePassword.toCharArray());
@@ -147,6 +170,25 @@ public class Keys {
             }
         }
         throw new IllegalArgumentException(String.format("unable to determine KeyStore type for: %s", keystorePath));
+    }
+
+    private static <T> Stream<T> stream(Enumeration<T> enumeration) {
+        return StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(
+                        new Iterator<T>() {
+                            @Override
+                            public boolean hasNext() {
+                                return enumeration.hasMoreElements();
+                            }
+                            @Override
+                            public T next() {
+                                return enumeration.nextElement();
+                            }
+                        },
+                        Spliterator.ORDERED
+                ),
+                false
+        );
     }
 
     @Getter

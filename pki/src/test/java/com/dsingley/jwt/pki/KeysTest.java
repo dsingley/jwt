@@ -54,7 +54,7 @@ class KeysTest {
             String keystorePassword = serverCertificate.getKeystorePassword();
             KeyStore keyStore = Keys.loadKeyStore(keystorePath, keystorePassword);
 
-            KeyPair keyPair = Keys.getKeyPair(keyStore, keystorePassword);
+            KeyPair keyPair = Keys.getKeyPair(keyStore, keystorePassword, null);
 
             assertAll(
                     () -> assertThat(keyPair.getPublic())
@@ -62,6 +62,23 @@ class KeysTest {
                     () -> assertThat(keyPair.getPrivate())
                             .isEqualTo(serverCertificate.getKeyPair().getPrivate())
             );
+        }
+    }
+
+    @Nested
+    class ComputePublicKeyFingerprintSHA256 {
+
+        @Test
+        void should_computeCorrectFingerprint_from_publicKey() {
+            TestPKICertificate serverCertificate = TEST_PKI.getOrCreateServerCertificate();
+            String keystorePath = serverCertificate.getOrCreateKeystoreFile().getAbsolutePath();
+            String keystorePassword = serverCertificate.getKeystorePassword();
+            KeyStore keyStore = Keys.loadKeyStore(keystorePath, keystorePassword);
+            KeyPair keyPair = Keys.getKeyPair(keyStore, keystorePassword, null);
+
+            String fingerprint = Keys.computePublicKeyFingerprintSHA256(keyPair);
+
+            assertThat(fingerprint).isEqualTo(serverCertificate.getPublicKeyFingerprintSHA256());
         }
     }
 
