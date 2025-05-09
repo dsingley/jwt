@@ -11,6 +11,7 @@ import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
 
 public enum JwtAlgorithm {
     RS256("RS", "256", "RSA"),
@@ -19,6 +20,22 @@ public enum JwtAlgorithm {
     ES256("ES", "256", "EC"),
     ES384("ES", "384", "EC"),
     ES512("ES", "512", "EC");
+
+    /**
+     * Select a {@link JwtAlgorithm} compatible with the provided {@link KeyPair} and specified hash size.
+     *
+     * @param keyPair  the {@link KeyPair} that will be used with the returned {@link JwtAlgorithm}
+     * @param hashSize the desired hash size ({@code "256"}, {@code "384"}, or {@code "512"})
+     * @return the matching {@link JwtAlgorithm}
+     * @throws IllegalArgumentException if no matching JwtAlgorithm is found
+     */
+    public static JwtAlgorithm compatibleWithKeyPairAndHashSize(@NonNull KeyPair keyPair, @NonNull String hashSize) {
+        return Arrays.stream(JwtAlgorithm.values())
+                .filter(algorithm -> algorithm.isCompatible(keyPair.getPublic()))
+                .filter(algorithm -> algorithm.hashSize.equals(hashSize))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("no JwtAlgorithm is compatible with the provided key pair and hash size"));
+    }
 
     /**
      * Test if the specified public key is compatible with this JwtAlgorithm.
@@ -37,7 +54,7 @@ public enum JwtAlgorithm {
      * <b>Note:</b> The key pair must be {@link JwtAlgorithm#isCompatible compatible} with this JwtAlgorithm.
      *
      * @param keyPair the {@link KeyPair} to use
-     * @param keyId a value to include as the <code>kid</code> in signed tokens (optional)
+     * @param keyId   a value to include as the <code>kid</code> in signed tokens (optional)
      * @return a configured {@link Algorithm}
      */
     public Algorithm getSigningAlgorithm(@NonNull KeyPair keyPair, String keyId) {
