@@ -50,7 +50,7 @@
 
         <junit.version>5.12.2</junit.version>
         <assertj.version>3.27.3</assertj.version>
-        <mockwebserver3.version>5.0.0-alpha.14</mockwebserver3.version>
+        <mockwebserver3.version>5.0.0-alpha.16</mockwebserver3.version>
         <testpki.version>0.5.0</testpki.version>
 
         <maven-surefire.version>3.5.3</maven-surefire.version>
