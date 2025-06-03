@@ -13,8 +13,6 @@ updates:
             timezone: America/New_York
         assignees:
             - dsingley
-        reviewers:
-            - dsingley
 
     -   package-ecosystem: github-actions
         directory: /
@@ -23,6 +21,4 @@ updates:
             time: "06:00"
             timezone: America/New_York
         assignees:
-            - dsingley
-        reviewers:
             - dsingley
