@@ -19,6 +19,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -35,7 +36,7 @@ class IntegrationTests {
     static JwtManager jwtManager;
 
     @BeforeAll
-    static void setUp() {
+    static void setUp() throws IOException {
         TestPKI testPKI = new TestPKI(KeyType.RSA_2048, null);
         TestPKICertificate serverCertificate = testPKI.getOrCreateServerCertificate("jwt-issuer", Collections.singleton("localhost"));
 
@@ -51,6 +52,7 @@ class IntegrationTests {
                         .build();
             }
         });
+        mockWebServer.start();
 
         keyId = String.format("%s#%s", mockWebServer.url("/"), serverCertificate.getPublicKeyFingerprintSHA256());
         SigningAlgorithmSupplier signingAlgorithmSupplier = new KeyPairSigningAlgorithmSupplier(JWT_ALGORITHM, serverCertificate.getKeyPair(), keyId);
@@ -75,7 +77,7 @@ class IntegrationTests {
     @AfterAll
     static void tearDown() throws Exception {
         if (mockWebServer != null) {
-            mockWebServer.shutdown();
+            mockWebServer.close();
         }
     }
 

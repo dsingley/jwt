@@ -17,11 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.net.URI;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.KeyStore;
-import java.security.Security;
-import java.util.Arrays;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -124,8 +123,9 @@ class KeysTest {
                                 .build();
                     }
                 });
+                mockWebServer.start();
 
-                URL url = new URL(mockWebServer.url("/").toString());
+                URL url = URI.create(mockWebServer.url("/").toString()).toURL();
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
                 connection.setSSLSocketFactory(sslSocketFactory);
                 connection.connect();
