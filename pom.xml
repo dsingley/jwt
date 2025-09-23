@@ -49,7 +49,7 @@
         <auth0-jwt.version>4.5.0</auth0-jwt.version>
 
         <junit.version>5.13.4</junit.version>
-        <assertj.version>3.27.5</assertj.version>
+        <assertj.version>3.27.6</assertj.version>
         <mockwebserver3.version>5.1.0</mockwebserver3.version>
         <testpki.version>0.5.0</testpki.version>
 
