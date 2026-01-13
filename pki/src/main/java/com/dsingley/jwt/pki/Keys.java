@@ -169,7 +169,8 @@ public class Keys {
                     throw new IllegalArgumentException(String.format("unexpected extension: %s", extension));
             }
         }
-        throw new IllegalArgumentException(String.format("unable to determine KeyStore type for: %s", keystorePath));
+        // Java >= 8u60 should support automatic detection, see https://bugs.openjdk.org/browse/JDK-8062552
+        return KeyStore.getInstance("JKS");
     }
 
     private static <T> Stream<T> stream(Enumeration<T> enumeration) {

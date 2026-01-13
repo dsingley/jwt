@@ -1,9 +1,5 @@
 package com.dsingley.jwt.pki;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import com.dsingley.testpki.KeyType;
 import com.dsingley.testpki.TestPKI;
 import com.dsingley.testpki.TestPKICertificate;
@@ -17,12 +13,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.net.URI;
 import java.net.URL;
 import java.security.KeyPair;
 import java.security.KeyStore;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSocketFactory;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class KeysTest {
     private static final TestPKI TEST_PKI = new TestPKI(KeyType.RSA_2048, null);
@@ -147,11 +146,10 @@ class KeysTest {
         }
 
         @Test
-        void should_throwException_for_unknownExtension() {
-            assertThatExceptionOfType(IllegalArgumentException.class)
-                    .isThrownBy(() ->
-                            Keys.getKeystoreInstance("/path/with/unknown.extension")
-                    );
+        void should_returnCompatibleDefault_for_unknownExtension() {
+            KeyStore keystoreInstance = Keys.getKeystoreInstance("cacerts");
+
+            assertThat(keystoreInstance.getType()).isEqualTo("JKS");
         }
     }
 }
