@@ -26,6 +26,7 @@ class JwtManagerTest {
     static final JwtAlgorithm JWT_ALGORITHM = JwtAlgorithm.RS384;
     static String keyId;
     static JwtManager jwtManager;
+    static VerifyOnlyJwtManager verifyOnlyJwtManager;
 
     @BeforeAll
     static void setUp() throws Exception {
@@ -48,6 +49,12 @@ class JwtManagerTest {
                 .ttlSeconds(30L)
                 .signingAlgorithmSupplier(signingAlgorithmSupplier)
                 .verificationAlgorithmSupplier(verificationAlgorithmSupplier)
+                .payloadPredicate(SUBJECT, (claim, decodedJWT) -> claim.asString().startsWith("test"))
+                .build();
+
+        verifyOnlyJwtManager = VerifyOnlyJwtManager.builder()
+                .verificationAlgorithmSupplier(verificationAlgorithmSupplier)
+                .keyIdPredicate(k -> k.equals(keyId))
                 .payloadPredicate(SUBJECT, (claim, decodedJWT) -> claim.asString().startsWith("test"))
                 .build();
     }
@@ -76,7 +83,7 @@ class JwtManagerTest {
         String token = jwtManager.create("testWithMap", map);
         log.info("created token:\n{}", token);
 
-        DecodedJWT decodedJWT = jwtManager.verify(token);
+        DecodedJWT decodedJWT = verifyOnlyJwtManager.verify(token);
         assertAll(
                 () -> assertThat(decodedJWT.getId()).matches("[0-9a-f]{32}"),
                 () -> assertThat(decodedJWT.getSubject()).isEqualTo("testWithMap"),
