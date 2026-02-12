@@ -228,10 +228,8 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <deploymentName>${project.name} ${project.version}</deploymentName>
-                            <!--
                             <autoPublish>true</autoPublish>
-                            <waitUntil>published</waitUntil>
-                            -->
+                            <waitUntil>validated</waitUntil>
                         </configuration>
                     </plugin>
                 </plugins>
