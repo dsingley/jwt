@@ -45,7 +45,7 @@
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.25.3</log4j.version>
         <guava.version>33.5.0-jre</guava.version>
-        <auth0-jwt.version>4.5.0</auth0-jwt.version>
+        <auth0-jwt.version>4.5.1</auth0-jwt.version>
 
         <junit.version>5.14.2</junit.version>
         <assertj.version>3.27.7</assertj.version>
