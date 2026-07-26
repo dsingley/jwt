@@ -75,7 +75,7 @@ class IntegrationTests {
     }
 
     @AfterAll
-    static void tearDown() throws Exception {
+    static void tearDown() {
         if (mockWebServer != null) {
             mockWebServer.close();
         }
