@@ -44,7 +44,7 @@
         <checker-qual.version>3.55.1</checker-qual.version>
         <slf4j.version>2.0.18</slf4j.version>
         <log4j.version>2.26.1</log4j.version>
-        <guava.version>33.6.0-jre</guava.version>
+        <guava.version>33.7.1-jre</guava.version>
         <auth0-jwt.version>4.6.0</auth0-jwt.version>
 
         <junit.version>5.14.4</junit.version>
